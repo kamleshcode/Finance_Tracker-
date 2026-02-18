@@ -7,6 +7,11 @@ router = APIRouter(prefix="/categories", tags=["Categories"])
 
 @router.post("")
 async def create_category(data: CategoryCreate):
+    """
+    Create a new category
+    :param data: The category schema containing name and metadata.
+    :return: dict
+    """
     try:
         doc = data.model_dump()
         doc["created_at"] = datetime.now(timezone.utc)
@@ -15,9 +20,13 @@ async def create_category(data: CategoryCreate):
     except Exception as e:
         raise HTTPException(500, str(e))
 
-
 @router.delete("/{name}")
 async def delete_category(name: str):
+    """
+    Delete a category
+    :param name: The case-insensitive name of the category to remove
+    :return: dict
+    """
     category_name = name.lower().strip()
     try:
         delete_res = await mongodb.db.categories.delete_one({"name": category_name})
@@ -36,9 +45,12 @@ async def delete_category(name: str):
     except Exception as e:
         raise HTTPException(500, f"Error: {str(e)}")
 
-
 @router.get("")
 async def list_categories():
+    """
+    Retrieve a list of all existing financial categories.
+    :return: list[dict]
+    """
     try:
         cursor = mongodb.db.categories.find()
         results = []
@@ -52,6 +64,12 @@ async def list_categories():
 #in transaction table not getting updated
 @router.patch("/{name}")
 async def update_category(data: CategoryUpdate, name: str):
+    """
+    Update a category
+    :param data: The partial update data.
+    :param name: The current name of the category to identify the record.
+    :return: dict
+    """
     try:
         category_name = name.lower().strip()
         update_data = data.model_dump(exclude_unset=True)
