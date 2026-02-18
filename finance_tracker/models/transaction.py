@@ -36,11 +36,10 @@ class TransactionCreate(BaseModel):
         return v
 
 class TransactionUpdate(BaseModel):
-    class TransactionUpdate(BaseModel):
-        title: Optional[str]
-        description: Optional[str]
-        amount: Optional[float]
-        type: Optional[str]
-        category: Optional[str]
-        date: Optional[datetime]
-        tags: Optional[List[str]]
+    title: Optional[str] = None
+    description: Optional[str] = None
+    amount: Optional[float] = None
+    type: Optional[str] = None
+    category: Optional[str] = None
+    date: Optional[datetime] = None
+    tags: Optional[List[str]] = None
