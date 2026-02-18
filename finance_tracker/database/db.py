@@ -1,4 +1,11 @@
+import os
+
 from motor.motor_asyncio import AsyncIOMotorClient
+from dotenv import load_dotenv
+
+load_dotenv()
+MONGODB_CONNECTION_STRING = os.getenv("MONGODB_URL")
+
 class MongoDB:
     def __init__(self):
         self.client = None
@@ -6,7 +13,7 @@ class MongoDB:
 
     async def connect(self):
         try:
-            self.client = AsyncIOMotorClient("mongodb://localhost:27017")
+            self.client = AsyncIOMotorClient(MONGODB_CONNECTION_STRING)
             self.db = self.client["finance_db"]
             await self.create_indexes()
             print("Connected to MongoDB")
