@@ -8,6 +8,11 @@ router = APIRouter(prefix="/transactions", tags=["Transactions"])
 
 @router.post("")
 async def create_transaction(data: TransactionCreate):
+    """
+    Register a new financial transaction.
+    :param data: Transaction details including amount, type, and category.
+    :return: dict
+    """
     try:
         doc = data.model_dump()
         doc["created_at"] = datetime.now(timezone.utc)
@@ -18,11 +23,14 @@ async def create_transaction(data: TransactionCreate):
         raise HTTPException(500, str(e))
 
 @router.get("/search")
-async def search_transactions(
-    q: str,
-    page: int = Query(1, ge=1),
-    page_size: int = Query(20, le=100)
-):
+async def search_transactions(q: str,page: int = Query(1, ge=1),page_size: int = Query(20, le=100)):
+    """
+    Search transactions by title or description with pagination.
+    :param q: Search keyword to filter title and description.
+    :param page: Current page number (starts at 1).
+    :param page_size: Number of records per page (max 100).
+    :return: dict
+    """
     try:
         search_term = q.lower().strip()
         all_records = []
@@ -57,6 +65,11 @@ async def search_transactions(
 
 @router.get("/summary")
 async def get_monthly_summary(month: str = Query(..., description="Format: YYYY-MM")):
+    """
+    Generate a financial summary for a specific month.
+    :param month: The month to summarize in 'YYYY-MM' format.
+    :return: dict
+    """
     try:
         year, mon = map(int, month.split("-"))
         start_date = datetime(year, mon, 1, tzinfo=timezone.utc)
@@ -115,6 +128,13 @@ async def get_monthly_summary(month: str = Query(..., description="Format: YYYY-
 
 @router.delete("/bulk")
 async def bulk_delete(category: str | None = Query(None),start_date: datetime | None = Query(None, alias="from"),end_date: datetime | None = Query(None, alias="to")):
+    """
+    Delete multiple transactions based on category or date range.
+    :param category: Category filter for deletion.
+    :param start_date: Start boundary for deletion range
+    :param end_date: End boundary for deletion range.
+    :return: dict
+    """
     try:
         query = {}
         if category:
@@ -135,6 +155,12 @@ async def bulk_delete(category: str | None = Query(None),start_date: datetime | 
 
 @router.get("")
 async def get_transactions(page: int = 1, page_size: int = 20):
+    """
+    Fetch a paginated list of all transactions.
+    :param page: Current page.
+    :param page_size: Number of items per page.
+    :return: dict
+    """
     try:
         skip = (page - 1) * page_size
         total = await mongodb.db.transactions.count_documents({})
@@ -157,6 +183,11 @@ async def get_transactions(page: int = 1, page_size: int = 20):
 
 @router.get("/{id}")
 async def get_transaction(id: str):
+    """
+    Retrieve a single transaction by its unique ID.
+    :param id: ObjectID
+    :return: dict
+    """
     try:
         doc = await mongodb.db.transactions.find_one({"_id": ObjectId(id)})
         if not doc:
@@ -169,19 +200,25 @@ async def get_transaction(id: str):
 
 @router.delete("/{id}")
 async def delete_transaction(id: str):
+    """
+    Remove a transaction from the database.
+    :param id: ObjectID
+    :return: dict
+    """
     try:
         doc = await mongodb.db.transactions.delete_one({"_id": ObjectId(id)})
         return {"status": "success", "data": doc}
     except Exception as e:
         raise HTTPException(500, str(e))
 
-
 @router.patch("/{id}")
-async def update_transaction(
-    id: str,
-    data: TransactionUpdate,
-
-):
+async def update_transaction(id: str,data: TransactionUpdate,):
+    """
+    Update a transaction.
+    :param id: ObjectID
+    :param data: Partial fields to update.
+    :return: dict
+    """
     if not ObjectId.is_valid(id):
         raise HTTPException(400, "Invalid ID format")
 
